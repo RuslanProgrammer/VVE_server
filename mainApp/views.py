@@ -8,10 +8,8 @@ from datetime import datetime as dt
 from django.core import management
 from django.utils.timezone import utc
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTTokenUserAuthentication
 
 from mainApp.models import Shop, Administrator, Worker, Checkout, Customer, CustomerHistory, CheckoutHistory, \
     Reservation
@@ -24,63 +22,40 @@ class ShopViewSet(viewsets.ModelViewSet):
     serializer_class = ShopSerializer
     queryset = Shop.objects.all()
 
-    # permission_classes = [IsAuthenticated]
-
 
 class AdministratorViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AdministratorSerializer
     queryset = Administrator.objects.all()
-
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
 
 
 class WorkerViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = WorkerSerializer
     queryset = Worker.objects.all()
 
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
-
 
 class CheckoutViewSet(viewsets.ModelViewSet):
     serializer_class = CheckoutSerializer
     queryset = Checkout.objects.all()
 
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
-
 
 class CustomerViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = CustomerSerializer
     queryset = Customer.objects.all()
-    #
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
 
 
 class CustomerHistoryViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerHistorySerializer
     queryset = CustomerHistory.objects.all()
 
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
-
 
 class CheckoutHistoryViewSet(viewsets.ModelViewSet):
     serializer_class = CheckoutHistorySerializer
     queryset = CheckoutHistory.objects.all()
 
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
-
 
 class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
-
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
 
 
 class CheckoutsOfShopListView(APIView):
@@ -91,8 +66,6 @@ class CheckoutsOfShopListView(APIView):
 
 
 class CheckoutsFreeOfShopListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         checkouts_id = [x.id for x in Checkout.objects.filter(shop=pk)]
@@ -107,14 +80,12 @@ class CheckoutsFreeOfShopListView(APIView):
         print(res)
 
         content = {
-            'Free checkouts': json.dumps(res),
+            'Free checkouts': json.dumps(*res),
         }
         return Response(content)
 
 
 class SimulateListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         for _ in range(10000):
@@ -132,8 +103,6 @@ class SimulateListView(APIView):
 
 
 class CheckoutsInfoOfShopListView(APIView):
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         checkout_history = CheckoutHistory.objects.filter(checkout=pk).order_by('id').last()
@@ -163,10 +132,7 @@ class CheckoutsICustomersListView(APIView):
         return Response(checkout_history.cur_load)
 
 
-
 class HistoryOfCustomerListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         customer_history = CustomerHistory.objects.filter(customer=pk)
@@ -177,9 +143,6 @@ class HistoryOfCustomerListView(APIView):
 
 
 class HistoryOfShopListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
-
     def get(self, request, pk):
         customer_history = CustomerHistory.objects.filter(shop=pk)
         content = {
@@ -189,8 +152,6 @@ class HistoryOfShopListView(APIView):
 
 
 class WorkersOfShopListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         workers = Worker.objects.filter(shop=pk)
@@ -201,8 +162,6 @@ class WorkersOfShopListView(APIView):
 
 
 class CustomersOfShopListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         customers_history = CustomerHistory.objects.filter(shop=pk)
@@ -215,8 +174,6 @@ class CustomersOfShopListView(APIView):
 
 
 class WorkerFreeListView(APIView):
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         checkouts = Checkout.objects.filter(shop=pk)
@@ -227,8 +184,6 @@ class WorkerFreeListView(APIView):
 
 
 class HistoryOfCheckoutListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         checkout_history = CheckoutHistory.objects.filter(checkout_id=pk)
@@ -239,8 +194,6 @@ class HistoryOfCheckoutListView(APIView):
 
 
 class UpdateMaxLoadOfCheckoutListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
         checkout_history = CheckoutHistory.objects.filter(checkout_id=pk).order_by('id').last()
@@ -253,8 +206,6 @@ class UpdateMaxLoadOfCheckoutListView(APIView):
 
 
 class GetFuturePredictionListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(get, request, pk):
         checkout_history = CheckoutHistory.objects.filter(checkout_id=pk).order_by('id').last()
@@ -298,7 +249,6 @@ class SimulateVisitors(APIView):
         CheckoutHistory.objects.create(checkout=checkout, max_load=3, cur_load=5)
 
         return Response()
-
 
 
 class BetterTimeToVisitShopListView(APIView):
@@ -370,8 +320,6 @@ class BetterTimeToVisitAllShopListView(APIView):
 
 
 class ChangeAnyWorkerOfCheckoutListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         checkout = Checkout.objects.filter(id=pk).first()
@@ -387,8 +335,6 @@ class ChangeAnyWorkerOfCheckoutListView(APIView):
 
 
 class RebalanceByShopListView(APIView):
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         checkouts = Checkout.objects.filter(shop=pk).all()
@@ -404,8 +350,6 @@ class RebalanceByShopListView(APIView):
 
 
 class ChangeWorkerOfCheckoutListView(APIView):
-    authentication_classes = [JWTTokenUserAuthentication]
-    permission_classes = [IsAuthenticated]
 
     def put(self, request, pk):
         checkout = Checkout.objects.filter(id=pk).first()
@@ -415,8 +359,6 @@ class ChangeWorkerOfCheckoutListView(APIView):
 
 
 class GetWorkerOfCheckoutByCheckoutListView(APIView):
-    # authentication_classes = [JWTTokenUserAuthentication]
-    # permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         checkout = Checkout.objects.filter(id=pk).first()
@@ -437,8 +379,6 @@ class ReservationsOfCustomerListView(APIView):
 
 
 class CreateBackup(APIView):
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [JWTTokenUserAuthentication]
 
     def get(self, request):
         path = "backups/" + str(str(dt.now()).replace(' ', 'T').replace(':', '_').split('.')[0]) + ".json"
@@ -448,8 +388,6 @@ class CreateBackup(APIView):
 
 
 class GetBackups(APIView):
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [JWTTokenUserAuthentication]
 
     def get(self, request):
         backups = [file.split('.')[0] for file in os.listdir("backups/")]
@@ -457,8 +395,6 @@ class GetBackups(APIView):
 
 
 class RestoreBackup(APIView):
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [JWTTokenUserAuthentication]
 
     def get(self, request, pk):
         backups = {index: file for index, file in enumerate(os.listdir("backups/"))}
@@ -469,8 +405,6 @@ class RestoreBackup(APIView):
 
 
 class RestoreLastBackup(APIView):
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [JWTTokenUserAuthentication]
 
     def get(self, request):
         backups = {index: file for index, file in enumerate(os.listdir("backups/"))}
